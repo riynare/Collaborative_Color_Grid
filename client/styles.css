@@ -1,8 +1,19 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+@media (min-width: 768px) {
+    .layout {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
 #grid {
     display: grid;
-    grid-template-columns: auto;
-    grid-template-rows: auto;
-}
+    width: min(90vw, 500px);
+    aspect-ratio: 1 / 1;
+} 
 .cell {
-    border: 10px solid gray;
+    border: 1px solid gray;
 }
