@@ -6,4 +6,6 @@ for (let i = 0; i < size ** 2; i++) {
     const cell = document.createElement("div");
     cell.classList.add("cell");
     grid.append(cell);
+    cell.addEventListener("click", () => {
+        cell.style.backgroundColor = document.getElementById("color-picker").value})
 }
