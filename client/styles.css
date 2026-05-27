@@ -17,3 +17,25 @@
 .cell {
     border: 1px solid gray;
 }
+.cell:hover {
+    border: 2px solid black;
+}
+.hidden {
+    display: none;
+}
+#colorMenu {
+  width: 120px;
+  padding: 0;
+  margin: 10px 0;
+  border: 1px solid #aaa;
+  list-style: none;
+}
+
+#colorMenu li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+#colorMenu li:hover {
+  background: #eee;
+}
