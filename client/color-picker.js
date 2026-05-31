@@ -7,5 +7,7 @@ colorMenu.addEventListener("click", (event) => {
         return;
     }
     window.selectedCell.style.backgroundColor = color;
+    window.selectedCell.style.border = "1px solid gray";
+    colorMenu.classList.remove("unhidden");
     colorMenu.classList.add("hidden");
 })
