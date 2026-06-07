@@ -1,1 +1,1 @@
-[Открыть index.html](client/index.html)
+[Открыть сайт](https://username.github.io/repo-name/client/)
