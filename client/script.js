@@ -32,6 +32,35 @@ for (let i = 0; i < size ** 2; i++) {
         let currentIndex = cellArray.indexOf(event.currentTarget);
         let newIndex = currentIndex;
 
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            const rect = cell.getBoundingClientRect();
+            openMenu(cell, rect.right, rect.top);
+            return;
+        }
+
+        if (event.key === "Escape") {
+            event.preventDefault();
+            cell.blur();
+            colorMenu.classList.remove("unhidden");
+            colorMenu.classList.add("hidden");
+            if (window.selectedCell) {
+                window.selectedCell.style.border = "1px solid gray";
+            }
+            return;
+        }
+
+        if (event.key === "Tab") {
+            if (colorMenu.classList.contains("unhidden")) {
+                event.preventDefault();
+                const firstColor = colorMenu.querySelector("li");
+                if (firstColor) {
+                    firstColor.focus();
+                }
+            }
+            return;
+        }
+
         switch (event.key) {
             case "ArrowUp":
                 newIndex = currentIndex - size;
@@ -61,24 +90,12 @@ for (let i = 0; i < size ** 2; i++) {
 
         if (newIndex >= 0 && newIndex < cellArray.length) {
             const newCell = cellArray[newIndex];
-            newCell.focus(); //Странный фокус
+            newCell.focus();
             colorMenu.classList.remove("unhidden");
             colorMenu.classList.add("hidden");
             if (window.selectedCell) {
-            window.selectedCell.style.border = "1px solid gray";
+                window.selectedCell.style.border = "1px solid gray";
             }
-            newCell.addEventListener("keydown", (event) => {
-                if (event.key === "Escape") {
-                    newCell.blur();
-                }
-            });
-            newCell.addEventListener("keydown", (event) => {
-                console.count("keydown на cell");
-                if (event.key === "Enter" || event.key === " ") {
-                    const rect = newCell.getBoundingClientRect();
-                    openMenu(newCell, rect.right, rect.top);
-                }
-            })
         }
     });
     grid.append(cell);

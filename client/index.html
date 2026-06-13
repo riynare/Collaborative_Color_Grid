@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang = "ru">
+<html lang="ru">
+
 <head>
-    <meta charset = "UTF-8" />
-    <meta name = "viewport" content = "width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Collaborative Color Grid</title>
     <link rel="stylesheet" href="styles.css">
 
@@ -16,15 +17,24 @@
     <main class="layout">
         <div id="grid"></div>
         <ul id="colorMenu" class="hidden">
-            <li data-color="red">Red<div data-color="red" style="background:red;"></div></li>
-            <li data-color="green">Green<div data-color="green" style="background:green;"></div></li>
-            <li data-color="blue">Blue<div data-color="blue" style="background:blue;"></div></li>
-            <li data-color="yellow">Yellow<div data-color="yellow" style="background:yellow;"></div></li>
-            <li data-color="orange">Orange<div data-color="orange" style="background:orange;"></div></li>
-            <li data-color="purple">Purple<div data-color="purple" style="background:purple;"></div></li>
-            <li data-color="black">Black<div data-color="black" style="background:black;"></div></li>
-            <li data-color="pink">Pink<div data-color="pink" style="background:pink;"></div></li>
-            <li data-color="aqua">Aqua<div data-color="aqua" style="background:aqua;"></div></li>
+            <li tabindex="0" data-color="red">Red<div data-color="red" style="background:red;"></div>
+            </li>
+            <li tabindex="0" data-color="green">Green<div data-color="green" style="background:green;"></div>
+            </li>
+            <li tabindex="0" data-color="blue">Blue<div data-color="blue" style="background:blue;"></div>
+            </li>
+            <li tabindex="0" data-color="yellow">Yellow<div data-color="yellow" style="background:yellow;"></div>
+            </li>
+            <li tabindex="0" data-color="orange">Orange<div data-color="orange" style="background:orange;"></div>
+            </li>
+            <li tabindex="0" data-color="purple">Purple<div data-color="purple" style="background:purple;"></div>
+            </li>
+            <li tabindex="0" data-color="black">Black<div data-color="black" style="background:black;"></div>
+            </li>
+            <li tabindex="0" data-color="pink">Pink<div data-color="pink" style="background:pink;"></div>
+            </li>
+            <li tabindex="0" data-color="aqua">Aqua<div data-color="aqua" style="background:aqua;"></div>
+            </li>
         </ul>
         <section id="log">
 
@@ -33,4 +43,5 @@
     <script src="script.js"></script>
     <script src="color-picker.js"></script>
 </body>
+
 </html>
