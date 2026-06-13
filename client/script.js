@@ -61,7 +61,7 @@ for (let i = 0; i < size ** 2; i++) {
 
         if (newIndex >= 0 && newIndex < cellArray.length) {
             const newCell = cellArray[newIndex];
-            newCell.focus();
+            newCell.focus(); //Странный фокус
             colorMenu.classList.remove("unhidden");
             colorMenu.classList.add("hidden");
             if (window.selectedCell) {
@@ -73,6 +73,7 @@ for (let i = 0; i < size ** 2; i++) {
                 }
             });
             newCell.addEventListener("keydown", (event) => {
+                console.count("keydown на cell");
                 if (event.key === "Enter" || event.key === " ") {
                     const rect = newCell.getBoundingClientRect();
                     openMenu(newCell, rect.right, rect.top);
