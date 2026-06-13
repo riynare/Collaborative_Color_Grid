@@ -1,102 +1,145 @@
-window.selectedCell = null;
+window.AppState = {
+    selectedCell: null,
+    lastPaintedCell: null,
+    currentColor: "red"
+};
+
 const grid = document.getElementById("grid");
-const size = +prompt("Введите размер окна(NxN)");
 const cellArray = [];
+
+// Validate grid size input
+let size = 10;
+while (true) {
+    const input = prompt("Введите размер окна(NxN) (от 1 до 50):", "10");
+    if (input === null) {
+        break; // Default to 10 if cancelled
+    }
+    const val = parseInt(input, 10);
+    if (!isNaN(val) && val > 0 && val <= 50) {
+        size = val;
+        break;
+    }
+    alert("Пожалуйста, введите корректное число от 1 до 50");
+}
+
 grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 grid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
-function openMenu(cell, x, y) {
-    if (window.selectedCell) {
-        window.selectedCell.style.border = "1px solid gray";
-    }
-    window.selectedCell = cell;
-    cell.style.border = "2px solid black";
 
-    colorMenu.classList.remove("hidden");
-    colorMenu.classList.add("unhidden");
-
-    colorMenu.style.position = "fixed";
-    colorMenu.style.left = `${x}px`;
-    colorMenu.style.top = `${y}px`;
-}
+// Use DocumentFragment for performance optimization
+const fragment = document.createDocumentFragment();
 for (let i = 0; i < size ** 2; i++) {
     const cell = document.createElement("div");
     cell.classList.add("cell");
-    cellArray.push(cell);
     cell.tabIndex = 0;
-    cell.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const rect = cell.getBoundingClientRect();
-        openMenu(cell, rect.right, rect.top);
-    });
-    cell.addEventListener("keydown", (event) => {
-        let currentIndex = cellArray.indexOf(event.currentTarget);
-        let newIndex = currentIndex;
+    cellArray.push(cell);
+    fragment.appendChild(cell);
+}
+grid.appendChild(fragment);
 
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            const rect = cell.getBoundingClientRect();
-            openMenu(cell, rect.right, rect.top);
-            return;
-        }
+// Click delegation
+grid.addEventListener("click", (event) => {
+    const cell = event.target.closest(".cell");
+    if (!cell) return;
 
-        if (event.key === "Escape") {
-            event.preventDefault();
-            cell.blur();
-            colorMenu.classList.remove("unhidden");
-            colorMenu.classList.add("hidden");
-            if (window.selectedCell) {
-                window.selectedCell.style.border = "1px solid gray";
-            }
-            return;
-        }
+    if (window.ColorPicker && window.ColorPicker.isOpen()) return;
+    event.stopPropagation();
+    window.AppState.selectedCell = cell;
+    window.AppState.lastPaintedCell = cell;
+    cell.style.backgroundColor = window.AppState.currentColor;
+});
 
-        if (event.key === "Tab") {
-            if (colorMenu.classList.contains("unhidden")) {
-                event.preventDefault();
-                const firstColor = colorMenu.querySelector("li");
-                if (firstColor) {
-                    firstColor.focus();
-                }
-            }
-            return;
-        }
+// Contextmenu delegation
+grid.addEventListener("contextmenu", (event) => {
+    const cell = event.target.closest(".cell");
+    if (!cell) return;
 
-        switch (event.key) {
-            case "ArrowUp":
-                newIndex = currentIndex - size;
-                break;
+    event.preventDefault();
+    event.stopPropagation();
+    if (window.ColorPicker && window.ColorPicker.isOpen()) return;
+    if (window.ColorPicker) {
+        window.ColorPicker.open(cell);
+    }
+});
 
-            case "ArrowDown":
-                newIndex = currentIndex + size;
-                break;
+// Keydown delegation
+grid.addEventListener("keydown", (event) => {
+    const cell = event.target.closest(".cell");
+    if (!cell) return;
 
-            case "ArrowRight":
-                if (currentIndex % size !== size - 1) {
-                    newIndex = currentIndex + 1;
-                }
-                break;
+    const currentIndex = cellArray.indexOf(cell);
+    let newIndex = currentIndex;
 
-            case "ArrowLeft":
-                if (currentIndex % size !== 0) {
-                    newIndex = currentIndex - 1;
-                }
-                break;
-
-            default:
-                return;
-        }
-
+    if (event.key === "Enter" || event.key === " ") {
+        if (window.ColorPicker && window.ColorPicker.isOpen()) return;
         event.preventDefault();
+        window.AppState.selectedCell = cell;
+        window.AppState.lastPaintedCell = cell;
+        cell.style.backgroundColor = window.AppState.currentColor;
+        return;
+    }
 
-        if (newIndex >= 0 && newIndex < cellArray.length) {
-            const newCell = cellArray[newIndex];
-            newCell.focus();
-            colorMenu.classList.remove("unhidden");
-            colorMenu.classList.add("hidden");
-            if (window.selectedCell) {
-                window.selectedCell.style.border = "1px solid gray";
+    if (event.key.toLowerCase() === "c" || event.key === "ContextMenu") {
+        if (window.ColorPicker && window.ColorPicker.isOpen()) return;
+        event.preventDefault();
+        if (window.ColorPicker) {
+            window.ColorPicker.open(cell);
+        }
+        return;
+    }
+
+    if (event.key === "Escape") {
+        event.preventDefault();
+        cell.blur();
+        if (window.ColorPicker) {
+            window.ColorPicker.close();
+        }
+        return;
+    }
+
+    if (event.key === "Tab") {
+        if (window.ColorPicker && window.ColorPicker.isOpen()) {
+            event.preventDefault();
+            const menu = document.getElementById("colorMenu");
+            const firstColor = menu ? menu.querySelector("li") : null;
+            if (firstColor) {
+                firstColor.focus();
             }
         }
-    });
-    grid.append(cell);
-};
+        return;
+    }
+
+    switch (event.key) {
+        case "ArrowUp":
+            newIndex = currentIndex - size;
+            break;
+
+        case "ArrowDown":
+            newIndex = currentIndex + size;
+            break;
+
+        case "ArrowRight":
+            if (currentIndex % size !== size - 1) {
+                newIndex = currentIndex + 1;
+            }
+            break;
+
+        case "ArrowLeft":
+            if (currentIndex % size !== 0) {
+                newIndex = currentIndex - 1;
+            }
+            break;
+
+        default:
+            return;
+    }
+
+    event.preventDefault();
+
+    if (newIndex >= 0 && newIndex < cellArray.length) {
+        const newCell = cellArray[newIndex];
+        newCell.focus();
+        if (window.ColorPicker) {
+            window.ColorPicker.close();
+        }
+    }
+});
