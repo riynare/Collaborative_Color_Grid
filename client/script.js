@@ -1,67 +1,44 @@
 window.AppState = {
     selectedCell: null,
     lastPaintedCell: null,
-    currentColor: "red"
+    currentColor: "red",
+    size: null
 };
 
 const grid = document.getElementById("grid");
 const cellArray = [];
 
-// Validate grid size input
-let size = 10;
-while (true) {
-    const input = prompt("Введите размер окна(NxN) (от 1 до 50):", "10");
-    if (input === null) {
-        break; // Default to 10 if cancelled
-    }
-    const val = parseInt(input, 10);
-    if (!isNaN(val) && val > 0 && val <= 50) {
-        size = val;
-        break;
-    }
-    alert("Пожалуйста, введите корректное число от 1 до 50");
-}
-
-grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-grid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
-
-// Use DocumentFragment for performance optimization
-const fragment = document.createDocumentFragment();
-for (let i = 0; i < size ** 2; i++) {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-    cell.tabIndex = 0;
-    cellArray.push(cell);
-    fragment.appendChild(cell);
-}
-grid.appendChild(fragment);
-
-// Click delegation
 grid.addEventListener("click", (event) => {
     const cell = event.target.closest(".cell");
     if (!cell) return;
 
     if (window.ColorPicker && window.ColorPicker.isOpen()) return;
+
     event.stopPropagation();
+
     window.AppState.selectedCell = cell;
     window.AppState.lastPaintedCell = cell;
-    cell.style.backgroundColor = window.AppState.currentColor;
+
+    const index = cellArray.indexOf(cell);
+    
+    socket.emit("paint-cell", {
+        index,
+        color: window.AppState.currentColor
+    });
 });
 
-// Contextmenu delegation
 grid.addEventListener("contextmenu", (event) => {
     const cell = event.target.closest(".cell");
     if (!cell) return;
 
     event.preventDefault();
     event.stopPropagation();
+
     if (window.ColorPicker && window.ColorPicker.isOpen()) return;
-    if (window.ColorPicker) {
-        window.ColorPicker.open(cell);
-    }
+
+    window.ColorPicker.open(cell);
 });
 
-// Keydown delegation
 grid.addEventListener("keydown", (event) => {
     const cell = event.target.closest(".cell");
     if (!cell) return;
@@ -70,61 +47,62 @@ grid.addEventListener("keydown", (event) => {
     let newIndex = currentIndex;
 
     if (event.key === "Enter" || event.key === " ") {
-        if (window.ColorPicker && window.ColorPicker.isOpen()) return;
         event.preventDefault();
-        window.AppState.selectedCell = cell;
-        window.AppState.lastPaintedCell = cell;
-        cell.style.backgroundColor = window.AppState.currentColor;
+
+        const index = cellArray.indexOf(cell);
+
+        socket.emit("paint-cell", {
+            index,
+            color: window.AppState.currentColor
+        });
+
         return;
     }
 
     if (event.key.toLowerCase() === "c" || event.key === "ContextMenu") {
-        if (window.ColorPicker && window.ColorPicker.isOpen()) return;
         event.preventDefault();
-        if (window.ColorPicker) {
-            window.ColorPicker.open(cell);
-        }
+        window.ColorPicker.open(cell);
         return;
     }
 
     if (event.key === "Escape") {
         event.preventDefault();
         cell.blur();
-        if (window.ColorPicker) {
-            window.ColorPicker.close();
-        }
+        window.ColorPicker.close();
         return;
     }
 
     if (event.key === "Tab") {
-        if (window.ColorPicker && window.ColorPicker.isOpen()) {
+        if (window.ColorPicker.isOpen()) {
             event.preventDefault();
-            const menu = document.getElementById("colorMenu");
-            const firstColor = menu ? menu.querySelector("li") : null;
+
+            const firstColor = document.querySelector("#colorMenu li");
+
             if (firstColor) {
                 firstColor.focus();
             }
         }
+
         return;
     }
 
     switch (event.key) {
         case "ArrowUp":
-            newIndex = currentIndex - size;
+            newIndex = currentIndex - window.AppState.size;
             break;
 
         case "ArrowDown":
-            newIndex = currentIndex + size;
+            newIndex = currentIndex + window.AppState.size;
             break;
 
         case "ArrowRight":
-            if (currentIndex % size !== size - 1) {
+            if (currentIndex % window.AppState.size !== window.AppState.size - 1) {
                 newIndex = currentIndex + 1;
             }
             break;
 
         case "ArrowLeft":
-            if (currentIndex % size !== 0) {
+            if (currentIndex % window.AppState.size !== 0) {
                 newIndex = currentIndex - 1;
             }
             break;
@@ -136,10 +114,55 @@ grid.addEventListener("keydown", (event) => {
     event.preventDefault();
 
     if (newIndex >= 0 && newIndex < cellArray.length) {
-        const newCell = cellArray[newIndex];
-        newCell.focus();
-        if (window.ColorPicker) {
-            window.ColorPicker.close();
-        }
+        cellArray[newIndex].focus();
+        window.ColorPicker.close();
     }
 });
+
+const logsList = document.getElementById("logsList");
+
+function addLog(user, action, timestamp) {
+
+    const logItem = document.createElement("div");
+    logItem.className = "log-item";
+
+    const time = timestamp
+        ? new Date(timestamp).toLocaleTimeString()
+        : new Date().toLocaleTimeString();
+
+    logItem.innerHTML = `
+        <span class="log-time">${time}</span>
+        <span class="log-user">${user}</span>
+        <span>${action}</span>
+    `;
+
+    logsList.appendChild(logItem);
+
+    logsList.scrollTop = logsList.scrollHeight;
+}
+function createGrid(size) {
+    window.AppState.size = size;
+
+    grid.innerHTML = "";
+    cellArray.length = 0;
+
+    grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < size * size; i++) {
+        const cell = document.createElement("div");
+
+        cell.classList.add("cell");
+        cell.tabIndex = 0;
+
+        cellArray.push(cell);
+        fragment.appendChild(cell);
+    }
+
+    grid.appendChild(fragment);
+}
+window.createGrid = createGrid;
+window.cellArray = cellArray;
+window.addLog = addLog;

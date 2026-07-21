@@ -45,8 +45,15 @@ colorMenu.addEventListener("click", (event) => {
     const color = target.dataset.color;
     window.AppState.currentColor = color;
     if (window.AppState.selectedCell) {
-        window.AppState.selectedCell.style.backgroundColor = color;
+
         window.AppState.lastPaintedCell = window.AppState.selectedCell;
+
+        const index = window.cellArray.indexOf(window.AppState.selectedCell);
+
+        window.socket.emit("paint-cell", {
+            index,
+            color
+        });
     }
     window.ColorPicker.close();
 });
@@ -62,8 +69,14 @@ colorMenu.addEventListener("keydown", (event) => {
         const color = document.activeElement ? document.activeElement.dataset.color : null;
         if (color && window.AppState.selectedCell) {
             window.AppState.currentColor = color;
-            window.AppState.selectedCell.style.backgroundColor = color;
             window.AppState.lastPaintedCell = window.AppState.selectedCell;
+
+            const index = window.cellArray.indexOf(window.AppState.selectedCell);
+
+            window.socket.emit("paint-cell", {
+                index,
+                color
+            });
             window.ColorPicker.close();
             window.AppState.selectedCell.focus();
         }
